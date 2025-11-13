@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import clsx from 'clsx'
 
@@ -28,10 +29,12 @@ export const PlayerTrack: React.FC<PlayerTrackProps> = ({
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           {avatarUrl && (
-            <img
+            <Image
               src={avatarUrl}
               alt={playerName}
-              className="w-8 h-8 rounded-full"
+              width={32}
+              height={32}
+              className="rounded-full"
             />
           )}
           <span className="font-medium text-sm md:text-base">{playerName}</span>
