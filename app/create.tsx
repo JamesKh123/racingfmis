@@ -46,7 +46,8 @@ export default function CreateGame() {
     setError('')
 
     try {
-      const { supabase } = await import('../lib/supabase')
+      const { getSupabase } = await import('../lib/getSupabase')
+      const { supabase } = await getSupabase()
       const roomCode = generateRoomCode()
       let textContent = selectedText
 

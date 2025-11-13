@@ -28,8 +28,9 @@ export function useRoomRealtime(roomCode: string) {
 
     ;(async () => {
       try {
-        const mod = await import('../lib/supabase')
-        supabaseClient = mod.supabase
+        const mod = await import('../lib/getSupabase')
+        const res = await mod.getSupabase()
+        supabaseClient = res.supabase
         if (!supabaseClient || !supabaseClient.channel) {
           setError('Realtime not available')
           return

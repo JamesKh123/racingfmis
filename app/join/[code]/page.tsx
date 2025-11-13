@@ -54,7 +54,8 @@ export default function RoomPage() {
   useEffect(() => {
     const loadRoom = async () => {
       try {
-        const { supabase } = await import('../../../lib/supabase')
+        const { getSupabase } = await import('../../../lib/getSupabase')
+        const { supabase } = await getSupabase()
         const { data: roomData, error: roomError } = await supabase
           .from('rooms')
           .select()
@@ -147,7 +148,9 @@ export default function RoomPage() {
       // Update Supabase
       ;(async () => {
         try {
-          const { supabase } = await import('../../../lib/supabase')
+          const { getSupabase } = await import('../../../lib/getSupabase')
+          const { supabase } = await getSupabase()
+          if (!supabase) return
           await supabase
             .from('room_players')
             .update({
@@ -200,7 +203,9 @@ export default function RoomPage() {
     // Update Supabase
     ;(async () => {
       try {
-        const { supabase } = await import('../../../lib/supabase')
+        const { getSupabase } = await import('../../../lib/getSupabase')
+        const { supabase } = await getSupabase()
+        if (!supabase) return
         await supabase
           .from('room_players')
           .update({
