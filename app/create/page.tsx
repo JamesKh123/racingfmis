@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -18,7 +18,7 @@ const SAMPLE_TEXTS = [
   {
     id: 'en-2',
     language: 'en',
-    title: 'Nature\'s Beauty',
+    title: "Nature's Beauty",
     content:
       'The natural world offers endless inspiration and beauty. Majestic mountains, serene forests, and vast oceans remind us of the wonder and complexity of our planet. Protecting these environments is crucial for future generations.',
   },
@@ -46,7 +46,7 @@ export default function CreateGame() {
     setError('')
 
     try {
-      const { getSupabase } = await import('../lib/getSupabase')
+      const { getSupabase } = await import('../../lib/getSupabase')
       const { supabase } = await getSupabase()
       const roomCode = generateRoomCode()
       let textContent = selectedText
@@ -57,6 +57,8 @@ export default function CreateGame() {
       }
 
       // Create room
+      if (!supabase) throw new Error('Supabase not available')
+
       const { data: room, error: roomError } = await supabase
         .from('rooms')
         .insert({
