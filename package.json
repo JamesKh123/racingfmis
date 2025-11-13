@@ -34,4 +34,8 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0"
   }
+  ,
+  "scripts": {
+    "create-demo-room": "node scripts/create_demo_room.js"
+  }
 }
