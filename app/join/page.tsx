@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -30,6 +30,9 @@ export default function JoinGame() {
       }
 
       // Find room
+      const { getSupabase } = await import('../../lib/getSupabase')
+      const { supabase } = await getSupabase()
+
       const { data: room, error: roomError } = await supabase
         .from('rooms')
         .select()

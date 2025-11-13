@@ -1,8 +1,8 @@
-'use client'
+"use client"
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+// Supabase will be dynamically imported in handlers to avoid server build-time errors when env vars are missing
 import { generateRoomCode, sanitizeCustomText, isKhmerText } from '@/lib/utils'
 import { motion } from 'framer-motion'
 
@@ -18,7 +18,7 @@ const SAMPLE_TEXTS = [
   {
     id: 'en-2',
     language: 'en',
-    title: 'Nature\'s Beauty',
+    title: "Nature's Beauty",
     content:
       'The natural world offers endless inspiration and beauty. Majestic mountains, serene forests, and vast oceans remind us of the wonder and complexity of our planet. Protecting these environments is crucial for future generations.',
   },
@@ -46,6 +46,8 @@ export default function CreateGame() {
     setError('')
 
     try {
+      const { getSupabase } = await import('../../lib/getSupabase')
+      const { supabase } = await getSupabase()
       const roomCode = generateRoomCode()
       let textContent = selectedText
 
@@ -55,6 +57,8 @@ export default function CreateGame() {
       }
 
       // Create room
+      if (!supabase) throw new Error('Supabase not available')
+
       const { data: room, error: roomError } = await supabase
         .from('rooms')
         .insert({
@@ -83,7 +87,17 @@ export default function CreateGame() {
       router.push(`/join/${roomCode}`)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to create room'
-      setError(message)
+
+      // Detect missing DB tables / schema errors and show actionable message
+      if (typeof message === 'string' && (message.includes("Could not find the table") || message.includes('relation "rooms" does not exist') || message.includes('does not exist'))) {
+        setError(
+          'Database schema missing — please run the SQL migrations (see `scripts/migrations.sql`) in your Supabase SQL editor.'
+        )
+      } else if (message === 'Supabase not available') {
+        setError('Supabase not initialized — ensure your NEXT_PUBLIC_SUPABASE_* env vars are set')
+      } else {
+        setError(message)
+      }
     } finally {
       setLoading(false)
     }

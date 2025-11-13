@@ -1,6 +1,5 @@
-import { useEffect, useCallback, useState } from 'react'
+import { useEffect, useCallback, useState, useRef } from 'react'
 import { RealtimeChannel } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
 
 export interface RoomEvent {
   type: 'join' | 'leave' | 'update_progress' | 'start_countdown' | 'start_race' | 'finish' | 'final_results'
@@ -23,31 +22,56 @@ export function useRoomRealtime(roomCode: string) {
   // Subscribe to room channel
   useEffect(() => {
     if (!roomCode) return
+    let mounted = true
+    let supabaseClient: any = null
+    let roomChannel: RealtimeChannel | null = null
 
-    const roomChannel = supabase.channel(`room:${roomCode}`, {
-      config: {
-        broadcast: { self: true },
-      },
-    })
-
-    roomChannel
-      .on('broadcast', { event: '*' }, (payload) => {
-        // Events will be handled by listeners
-      })
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          setIsConnected(true)
-          setError(null)
-        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
-          setIsConnected(false)
-          setError('Connection lost')
+    ;(async () => {
+      try {
+        const mod = await import('../lib/getSupabase')
+        const res = await mod.getSupabase()
+        supabaseClient = res.supabase
+        if (!supabaseClient || !supabaseClient.channel) {
+          setError('Realtime not available')
+          return
         }
-      })
 
-    setChannel(roomChannel)
+        roomChannel = supabaseClient.channel(`room:${roomCode}`, {
+          config: { broadcast: { self: true } },
+        })
+
+        roomChannel
+          .on('broadcast', { event: '*' }, (payload) => {
+            // Events will be handled by listeners
+          })
+          .subscribe((status) => {
+            if (!mounted) return
+            if (status === 'SUBSCRIBED') {
+              setIsConnected(true)
+              setError(null)
+            } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+              setIsConnected(false)
+              setError('Connection lost')
+            }
+          })
+
+        if (mounted) {
+          setChannel(roomChannel)
+        }
+      } catch (err) {
+        setError((err as Error).message || 'Failed to initialize realtime')
+      }
+    })()
 
     return () => {
-      supabase.removeChannel(roomChannel)
+      mounted = false
+      if (supabaseClient && roomChannel) {
+        try {
+          supabaseClient.removeChannel(roomChannel)
+        } catch (e) {
+          // ignore
+        }
+      }
     }
   }, [roomCode])
 

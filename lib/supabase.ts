@@ -3,11 +3,20 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables')
+let client: any = null
+
+if (supabaseUrl && supabaseAnonKey) {
+  client = createClient(supabaseUrl, supabaseAnonKey)
+} else {
+  // In development without env vars, avoid throwing so the dev server can run.
+  // Code that actually calls Supabase will fail at runtime; that's caught by callers.
+  // This makes the app more resilient when env vars are not set.
+  // eslint-disable-next-line no-console
+  console.warn('Warning: Missing Supabase environment variables. Supabase client not initialized.')
+  client = {} as any
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = client
 
 export type Database = {
   public: {
