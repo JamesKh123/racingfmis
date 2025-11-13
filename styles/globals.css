@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  @apply box-border;
+}
+
+html {
+  @apply scroll-smooth;
+}
+
+body {
+  @apply bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-50 transition-colors duration-200;
+  font-family: 'Noto Sans', system-ui, sans-serif;
+}
+
+.khmer-text {
+  font-family: 'Noto Sans Khmer', 'Noto Sans', system-ui, sans-serif;
+}
+
+/* Typing area styles */
+.typing-word {
+  @apply inline-block px-1 py-0.5 rounded relative;
+}
+
+.typing-word.current {
+  @apply bg-blue-200 dark:bg-blue-900;
+}
+
+.typing-word.completed {
+  @apply text-green-600 dark:text-green-400;
+}
+
+.typing-word.error {
+  @apply text-red-600 dark:text-red-400 underline underline-offset-2;
+}
+
+.typing-char {
+  @apply relative;
+}
+
+.typing-char.current {
+  @apply border-l-2 border-blue-500 animate-blink;
+}
+
+.typing-char.error {
+  @apply border-b-2 border-red-500;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    @apply !animate-none !transition-none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  .typing-word.current {
+    @apply border-2 border-blue-600;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  @apply outline-2 outline-offset-2 outline-blue-500;
+}
