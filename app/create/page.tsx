@@ -87,7 +87,17 @@ export default function CreateGame() {
       router.push(`/join/${roomCode}`)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to create room'
-      setError(message)
+
+      // Detect missing DB tables / schema errors and show actionable message
+      if (typeof message === 'string' && (message.includes("Could not find the table") || message.includes('relation "rooms" does not exist') || message.includes('does not exist'))) {
+        setError(
+          'Database schema missing — please run the SQL migrations (see `scripts/migrations.sql`) in your Supabase SQL editor.'
+        )
+      } else if (message === 'Supabase not available') {
+        setError('Supabase not initialized — ensure your NEXT_PUBLIC_SUPABASE_* env vars are set')
+      } else {
+        setError(message)
+      }
     } finally {
       setLoading(false)
     }
