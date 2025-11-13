@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+// Supabase will be dynamically imported in handlers to avoid server build-time errors when env vars are missing
 import { generateRoomCode, sanitizeCustomText, isKhmerText } from '@/lib/utils'
 import { motion } from 'framer-motion'
 
@@ -46,6 +46,7 @@ export default function CreateGame() {
     setError('')
 
     try {
+      const { supabase } = await import('../lib/supabase')
       const roomCode = generateRoomCode()
       let textContent = selectedText
 

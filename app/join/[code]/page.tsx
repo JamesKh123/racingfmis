@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+// Supabase will be dynamically imported inside effects/handlers to avoid server build-time errors when env vars are missing
 import { useRoomRealtime } from '@/hooks/useRoomRealtime'
 import { TypingArea } from '@/components/TypingArea'
 import { PlayerTrack } from '@/components/PlayerTrack'
@@ -54,6 +54,7 @@ export default function RoomPage() {
   useEffect(() => {
     const loadRoom = async () => {
       try {
+        const { supabase } = await import('../../../lib/supabase')
         const { data: roomData, error: roomError } = await supabase
           .from('rooms')
           .select()
@@ -82,7 +83,7 @@ export default function RoomPage() {
         if (playerError) throw new Error('Failed to load players')
 
         const playerMap = new Map<string, Player>()
-        playerData?.forEach((p) => {
+        playerData?.forEach((p: any) => {
           playerMap.set(p.id, {
             id: p.id,
             displayName: p.display_name,
@@ -144,17 +145,22 @@ export default function RoomPage() {
       })
 
       // Update Supabase
-      supabase
-        .from('room_players')
-        .update({
-          correct_chars: progress.correctChars,
-          total_chars_typed: progress.totalCharsTyped,
-          mistakes: progress.mistakes,
-          progress_percent: progress.progressPercent,
-        })
-        .eq('id', currentPlayer.id)
-        .then()
-        .catch(console.error)
+      ;(async () => {
+        try {
+          const { supabase } = await import('../../../lib/supabase')
+          await supabase
+            .from('room_players')
+            .update({
+              correct_chars: progress.correctChars,
+              total_chars_typed: progress.totalCharsTyped,
+              mistakes: progress.mistakes,
+              progress_percent: progress.progressPercent,
+            })
+            .eq('id', currentPlayer.id)
+        } catch (e) {
+          console.error(e)
+        }
+      })()
     },
     [currentPlayer, players, broadcast]
   )
@@ -192,16 +198,21 @@ export default function RoomPage() {
     })
 
     // Update Supabase
-    supabase
-      .from('room_players')
-      .update({
-        wpm,
-        accuracy,
-        finished_at: new Date().toISOString(),
-      })
-      .eq('id', currentPlayer.id)
-      .then()
-      .catch(console.error)
+    ;(async () => {
+      try {
+        const { supabase } = await import('../../../lib/supabase')
+        await supabase
+          .from('room_players')
+          .update({
+            wpm,
+            accuracy,
+            finished_at: new Date().toISOString(),
+          })
+          .eq('id', currentPlayer.id)
+      } catch (e) {
+        console.error(e)
+      }
+    })()
   }, [currentPlayer, room, players, broadcast])
 
   if (loading) {

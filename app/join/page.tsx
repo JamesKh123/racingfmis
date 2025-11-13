@@ -30,6 +30,8 @@ export default function JoinGame() {
       }
 
       // Find room
+      const { supabase } = await import('../../lib/supabase')
+
       const { data: room, error: roomError } = await supabase
         .from('rooms')
         .select()
